@@ -1,0 +1,146 @@
+{
+  "name": "Clintricia - Computer Operator I Simulation",
+  "nodes": [
+    {
+      "parameters": {
+        "authentication": "airtableTokenApi",
+        "operation": "list",
+        "application": {
+          "__rl": true,
+          "value": "=appU0n0qG3AzZZayu",
+          "mode": "id"
+        },
+        "table": {
+          "__rl": true,
+          "value": "Jobs",
+          "mode": "id"
+        },
+        "additionalOptions": {}
+      },
+      "id": "d1460a67-a40b-4d9e-ac18-94d8c9d33dd1",
+      "name": "Get Queued Jobs",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 1,
+      "position": [
+        208,
+        0
+      ],
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "QWfN95rH7nzmlkC5",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "interval": "30"
+      },
+      "name": "Trigger",
+      "type": "n8n-nodes-base.interval",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "a6915659-818f-4dfd-871c-09acb6899557"
+    },
+    {
+      "parameters": {
+        "functionCode": "\nconst status = Math.random() < 0.8 ? 'Completed' : 'Failed';\nconst log = status === 'Completed'\n  ? `SUCCESS: Job completed at ${new Date().toLocaleTimeString()}`\n  : `ERROR: Routing failed at ${new Date().toLocaleTimeString()}`;\n\nreturn items.map(item => {\n  return {\n    json: {\n      id: item.json.id,\n      fields: {\n        Status: status,\n        ConsoleLog: log\n      }\n    }\n  };\n});\n"
+      },
+      "name": "Set Job Status",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        400,
+        0
+      ],
+      "id": "8e56c310-eee0-468a-b045-49640dcf54f3"
+    },
+    {
+      "parameters": {
+        "authentication": "airtableTokenApi",
+        "operation": "update",
+        "application": {
+          "__rl": true,
+          "value": "=appU0n0qG3AzZZayu",
+          "mode": "id"
+        },
+        "table": {
+          "__rl": true,
+          "value": "Jobs",
+          "mode": "id"
+        },
+        "id": "={{$json[\"id\"]}}",
+        "updateAllFields": false,
+        "fields": [
+          "={{$json[\"Status\"]}}",
+          "={{$json[\"ConsoleLog\"]}}"
+        ],
+        "options": {}
+      },
+      "name": "Update Job in Airtable",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 1,
+      "position": [
+        608,
+        0
+      ],
+      "id": "c3a2393b-a42d-4b07-b038-42340327cc02",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "QWfN95rH7nzmlkC5",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get Queued Jobs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Queued Jobs": {
+      "main": [
+        [
+          {
+            "node": "Set Job Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Job Status": {
+      "main": [
+        [
+          {
+            "node": "Update Job in Airtable",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "eaca6905-09ba-4ae0-9758-e8d7ee0a2a29",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "c6b649afae58bd710bea135ea73196719003a30c84d1504e20f54e2d965f6104"
+  },
+  "id": "UFjkAT5gAezLxWUO",
+  "tags": []
+}
